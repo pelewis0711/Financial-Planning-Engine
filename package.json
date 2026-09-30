@@ -1,5 +1,5 @@
 {
-  "name": "plan-architect",
+  "name": "financial-planning-engine",
   "version": "1.1.0",
   "description": "Comprehensive financial planning engine: TY2026 tax projection, Monte Carlo retirement analysis, Roth conversion ladder with IRMAA, and a rules-based recommendation engine.",
   "type": "module",
