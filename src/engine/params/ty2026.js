@@ -81,6 +81,16 @@ export const T26 = {
     rmdAge: (birthYear) => birthYear >= 1960 ? 75 : 73,
     qcdAge: 70.5, qcdMax: 111000, r529ToRoth: 35000,
   },
+  // Social Security survivor benefits (SSA). Children under 18 receive 75% of
+  // the deceased worker's PIA; a surviving parent caring for a child under 16
+  // receives 75%, reduced $1 for every $2 of earnings above the earnings-test
+  // exempt amount. Family maximum is 150–188% of PIA; 175% is used here.
+  ssSurvivor: {
+    childPct: .75, childUntilAge: 18,
+    parentPct: .75, parentUntilChildAge: 16,
+    familyMaxPct: 1.75,
+    earningsTestExempt: 24480, earningsTestRate: .5,
+  },
   estate: { fedExemption: 15000000, annualGift: 19000, ilExemption: 4000000, ilPortability: false, superfund529: 95000 },
   il: { rate: .0495, retirementExempt: true },
   // Medicare Part B IRMAA (CMS 2026 fact sheet). Monthly premium per person,

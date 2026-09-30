@@ -175,11 +175,16 @@ export function renderPlanHTML(M, { whatIf, baseline } = {}){
     <h4>Coverage vs. Exposure</h4>
     <table class="data">
       <tr><th style="text-align:left">Exposure</th><th>Need</th><th>In Force</th><th>Gap</th></tr>
-      <tr><td>Life — ${esc(d.c1_name||'Client 1')} (capital needs method)</td><td>${fmt$(ins.life1.need)}</td><td>${fmt$(ins.life1.existing)}</td><td>${fmt$(ins.life1.gap)}</td></tr>
-      ${ins.life2?`<tr><td>Life — ${esc(d.c2_name)}</td><td>${fmt$(ins.life2.need)}</td><td>${fmt$(ins.life2.existing)}</td><td>${fmt$(ins.life2.gap)}</td></tr>`:''}
+      <tr><td>Life — ${esc(d.c1_name||'Client 1')} (needs analysis)</td><td>${fmt$(ins.life1.need)}</td><td>${fmt$(ins.life1.existing)}</td><td>${fmt$(ins.life1.gap)}</td></tr>
+      ${ins.life2?`<tr><td>Life — ${esc(d.c2_name)} (needs analysis)</td><td>${fmt$(ins.life2.need)}</td><td>${fmt$(ins.life2.existing)}</td><td>${fmt$(ins.life2.gap)}</td></tr>`:''}
       <tr><td>Disability — ${esc(d.c1_name||'Client 1')} (60% replacement)</td><td>${fmt$(ins.di1.target)}/yr</td><td>${fmt$(ins.di1.covered)}/yr</td><td>${fmt$(ins.di1.gap)}/yr</td></tr>
       ${ins.di2?`<tr><td>Disability — ${esc(d.c2_name)}</td><td>${fmt$(ins.di2.target)}/yr</td><td>${fmt$(ins.di2.covered)}/yr</td><td>${fmt$(ins.di2.gap)}/yr</td></tr>`:''}
-      <tr><td>Personal liability (umbrella vs. net worth)</td><td>${fmt$(ins.umbrellaTarget)}</td><td>${fmt$(d.umbrella)}</td><td>${fmt$(ins.umbrellaGap)}</td></tr>
+      <tr><td>Personal liability (umbrella vs. creditor-exposed net worth)</td><td>${fmt$(ins.umbrellaTarget)}</td><td>${fmt$(d.umbrella)}</td><td>${fmt$(ins.umbrellaGap)}</td></tr>
+    </table>
+    <h4>Life Insurance Needs Analysis</h4>
+    <p>What the family would need if each client died today, in today's dollars. Ongoing spending is reduced by debt service (debts are paid off from the death benefit) and the decedent's ${fmtPct(a.consumption,0)} personal share, then offset by the survivor's take-home pay and Social Security survivor benefits for minor children. The income-replacement figure (75% of gross pay to retirement) is shown as an upper bound, not a target.</p>
+    <table class="data"><tr><th style="text-align:left">If this client dies</th><th>Survivor spending/yr</th><th>Survivor take-home/yr</th><th>SS survivor benefits (yr 1)</th><th>PV of income gap</th><th>+ Debts, education, final</th><th>− Liquid assets</th><th>Need</th><th>Income-replacement ceiling</th></tr>
+    ${[[d.c1_name||'Client 1',ins.life1],[d.c2_name,ins.life2]].filter(([,l])=>l).map(([n,l])=>`<tr><td>${esc(n)}</td><td>${fmt$(l.survivorSpend)}</td><td>${fmt$(l.survivorNet)}</td><td>${fmt$(l.ssYear1)}</td><td>${fmt$(l.pvGap)}</td><td>${fmt$(l.lumpSums)}</td><td>(${fmt$(ins.liquid)})</td><td><b>${fmt$(l.need)}</b></td><td>${fmt$(l.hlv)}</td></tr>`).join('')}
     </table>
     <h4>Findings & Recommendations</h4>${domainRecs(R,'insurance')}
   </div></div>

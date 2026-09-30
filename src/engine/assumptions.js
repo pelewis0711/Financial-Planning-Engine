@@ -4,7 +4,7 @@ export const DEFAULT_ASSUMPTIONS = {
   as_inflation: 2.5, as_salary_growth: 3, as_equity_ret: 8.5, as_equity_vol: 16,
   as_bond_ret: 4.3, as_bond_vol: 5.5, as_cash_ret: 2.8, as_college_infl: 5,
   as_college_cost: 28000, as_college_years: 4, as_life_exp: 95, as_mc_trials: 1000,
-  as_ret_equity: 50, as_discount: 4.5,
+  as_ret_equity: 50, as_discount: 4.5, as_personal_consumption: 25,
 };
 
 /** Equity/fixed-income correlation used for the blended portfolio σ. */
@@ -26,6 +26,7 @@ export function resolveAssumptions(d) {
   a.cashRet = a.as_cash_ret / 100;
   a.collInfl = a.as_college_infl / 100;
   a.disc = a.as_discount / 100;
+  a.consumption = a.as_personal_consumption / 100;
   return a;
 }
 

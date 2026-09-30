@@ -204,6 +204,7 @@ export const ASSUME_SCHEMA = [
   num('as_mc_trials','Monte Carlo Trials','Default 1,000'),
   pct('as_ret_equity','Retirement-Phase Equity Allocation (%)','Glide-path landing point; default 50%'),
   pct('as_discount','Discount Rate for Insurance PV Calcs','Default 4.5%'),
+  pct('as_personal_consumption','Decedent’s Share of Household Spending (%)','Spending that stops at death, for life-insurance needs; default 25%'),
 ]},
 ];
 

@@ -11,7 +11,7 @@ All 2026 parameters are in [`src/engine/params/ty2026.js`](../src/engine/params/
 | Brackets, standard deduction, LTCG thresholds, AMT, estate exclusion, gift exclusion | IRS Rev. Proc. 2025-32 (IR-2025-103) |
 | 401(k)/IRA limits, catch-ups, IRA and Roth phase-outs | IRS Notice 2025-67 (IR-2025-111) |
 | HSA limits | IRS Rev. Proc. 2025-19 |
-| Social Security wage base | SSA 2026 COLA fact sheet |
+| Social Security wage base, earnings-test exempt amount ($24,480) | SSA 2026 COLA fact sheet; SSA Office of the Chief Actuary |
 | Part B premium and IRMAA tiers | CMS, *2026 Medicare Parts A & B Premiums and Deductibles* |
 | SALT cap and phase-down, senior deduction, child tax credit | One Big Beautiful Bill Act (P.L. 119-21) |
 | QCD limit ($111,000, indexed) | IRS / custodian 2026 guidance |
@@ -80,11 +80,17 @@ The ladder is compared to doing nothing on three outcomes: the remaining pre-tax
 
 ## Insurance, estate, education, debt, investments
 
-- **Life insurance (capital-needs):**
-  - Need = present value of 75% of income until retirement (a growing annuity at the wage-growth rate, discounted at 4.5%) + all debts + unfunded college costs + $25,000 final expenses − liquid assets.
-  - Gap = need − coverage in force.
+- **Life insurance (needs analysis):** computed separately for each client's death, in today's dollars, discounted at the real discount rate ((1 + 4.5%) / (1 + inflation) − 1).
+  - **Survivor spending** = household spending − debt service (debts are paid off from the death benefit) − the decedent's personal share (assumption, default 25%). Childcare drops off once the youngest child turns 18.
+  - **Survivor take-home** = the surviving spouse's pay less taxes (run through the full tax engine as head of household, or single with no dependents) and their own retirement saving. It grows with real wages until they retire.
+  - **Social Security survivor benefits:** 75% of the decedent's PIA per child under 18, plus 75% to the surviving parent while a child is under 16. The parent's benefit is reduced $1 for every $2 of earnings above the 2026 earnings-test exempt amount ($24,480). The total is capped at a family maximum of 175% of PIA (the actual range is 150–188%).
+  - **Horizon:** until the survivor retires or the youngest child turns 18, whichever is later.
+  - **Need** = PV of each year's shortfall (spending − take-home − benefits, floored at zero) + debts + unfunded college + $25,000 final expenses − liquid assets (cash and taxable brokerage). Gap = need − coverage in force.
+  - **Retirement accounts** are assumed to fund the survivor's own retirement, so they are neither counted as available capital nor is a separate retirement need added.
+  - **Income replacement** (PV of 75% of the decedent's gross pay until retirement) is reported alongside as an upper bound. It is what "10× income" rules of thumb approximate, and it overstates the need for dual-income households because it ignores the survivor's income, survivor benefits, and the spending that stops at death.
+  - When coverage in force is more than twice the need (and exceeds it by $500k or more), the engine flags it as a low-priority review item rather than recommending more insurance.
 - **Disability:** target is 60% income replacement. The gap is compared against current LTD coverage, and the coverage definition (own- vs. any-occupation) is flagged.
-- **Liability:** umbrella target is net worth rounded up to the next $1M.
+- **Liability:** umbrella target is **creditor-exposed** net worth, rounded up to the next $1M. Exposed net worth excludes employer retirement plans (ERISA), IRAs and Roth IRAs (federal bankruptcy exemption; fully exempt in Illinois), and 529 plans (exempt in Illinois).
 - **Estate:** projected gross estate (net worth + personally owned life insurance + expected inheritance, grown modestly) vs. the federal exclusion ($15M per person, portable) and the Illinois $4M exemption (**not** portable). The model also checks for missing core documents, guardianship, and stale beneficiaries.
 - **Education:**
   - Cost = today's cost × years of college × education inflation to age 18 × share funded.

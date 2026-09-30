@@ -104,7 +104,7 @@ const SNAPSHOT = {
   netWorth: 3340500,
   atRetirement: 8533328,
   firstRMD: 493317,
-  recommendations: 35,
+  recommendations: 34,
 };
 
 test('compact currency formatting puts the sign before the dollar sign', async () => {

@@ -115,19 +115,25 @@ function retirementRules({ d, tax, cf, ret, ins, est, edu, debt, inv, a, ladder 
 
 /* ---- Insurance / Risk ---- */
 function insuranceRules({ d, tax, cf, ret, ins, est, edu, debt, inv, a, ladder }, add) {
-  if(ins.life1.gap>100000) add('insurance','high',`Life insurance gap — ${esc(d.c1_name||'Client 1')}`,
-    `Capital-needs analysis (income replacement at 75% to retirement, discounted at ${fmtPct(a.disc)}, plus debt retirement ${fmt$(ins.debts)}, education funding ${fmt$(ins.eduNeed)}, final expenses, net of liquid assets) indicates a need of ${fmt$(ins.life1.need)} vs. ${fmt$(ins.life1.existing)} in force. Close with laddered level-term (e.g., staggered 15/20/25-yr tranches matching declining need) — permanent coverage is not indicated absent estate liquidity or LTC-hybrid rationale.`,
-    `Gap: ${fmt$(ins.life1.gap)}`,94);
-  if(ins.life2&&ins.life2.gap>100000) add('insurance','high',`Life insurance gap — ${esc(d.c2_name||'Client 2')}`,
-    `Same methodology yields a ${fmt$(ins.life2.need)} need vs. ${fmt$(ins.life2.existing)} in force. Do not ignore a non-working or lower-earning spouse: replacement cost of household services plus childcare continuity justifies coverage.`,
-    `Gap: ${fmt$(ins.life2.gap)}`,90);
+  const lifeRules = (life, name, score) => {
+    if (!life) return;
+    const who = esc(name);
+    if (life.gap > 100000) add('insurance', 'high', `Life insurance gap — ${who}`,
+      `Needs analysis: if ${who} died today, survivor spending of ${fmt$(life.survivorSpend)}/yr (household spending less debt service and ${fmtPct(a.consumption, 0)} personal consumption) against survivor take-home of ${fmt$(life.survivorNet)}/yr and Social Security survivor benefits of ${fmt$(life.ssYear1)}/yr leaves an income gap worth ${fmt$(life.pvGap)} over ${life.horizon} years. Adding debt payoff, unfunded education and final expenses (${fmt$(life.lumpSums)}) and subtracting liquid assets (${fmt$(ins.liquid)}) gives a need of ${fmt$(life.need)} vs. ${fmt$(life.existing)} in force. Close with laddered level term (staggered 10/20-yr policies matching the declining need); group coverage is not portable and should not be counted on long term.`,
+      `Gap: ${fmt$(life.gap)}`, score);
+    else if (life.existing > 2 * life.need && life.existing - life.need > 500000) add('insurance', 'low', `Life coverage exceeds needs-based estimate — ${who}`,
+      `${fmt$(life.existing)} in force vs. a ${fmt$(life.need)} needs-based estimate (survivor income and Social Security survivor benefits cover most ongoing spending). Before reducing coverage, confirm how much is employer group life (not portable), whether the estate needs liquidity, and whether the family wants a margin for a longer horizon or a higher standard of living; income replacement would support up to ${fmt$(life.hlv)}.`,
+      '', 30);
+  };
+  lifeRules(ins.life1, d.c1_name || 'Client 1', 94);
+  lifeRules(ins.life2, d.c2_name || 'Client 2', 90);
   if(ins.di1.gap>10000) add('insurance','high',`Disability income gap — ${esc(d.c1_name||'Client 1')}`,
     `LTD replaces ${fmtPct(ins.di1.covered/Math.max(1,ins.di1.target/.6))} of income vs. a 60% target — gap of ${fmt$(ins.di1.gap)}/yr. ${ins.di1.def==='Any-Occupation'?'Existing coverage is any-occupation, which is materially weaker; supplement with an own-occupation individual policy.':ins.di1.def==='None'?'No LTD in force — morbidity risk pre-65 exceeds mortality risk and this is the plan’s largest unfunded exposure.':'Verify the own-occupation definition, residual rider, and COLA rider.'} Note: employer-paid premiums make benefits taxable; individually-paid (after-tax) benefits are tax-free, so the effective gap is larger than nominal.`,
     `Uninsured income stream: ${fmt$(ins.di1.gap)}/yr`,93);
   if(ins.di2&&ins.di2.gap>10000) add('insurance','med',`Disability income gap — ${esc(d.c2_name||'Client 2')}`,
     `LTD gap of ${fmt$(ins.di2.gap)}/yr against the 60% benchmark. Same own-occupation and tax-character considerations apply.`,'',70);
   if(ins.umbrellaGap>0) add('insurance','med','Personal liability limits below net worth',
-    `Net worth of ${fmt$(ins.netWorth)} vs. ${fmt$(d.umbrella)} umbrella coverage. Judgment creditors can reach non-exempt assets and future wages. Increase to ${fmt$(ins.umbrellaTarget)} (≈$200–400/yr per $1M) and confirm underlying auto/home liability meets the umbrella attachment point.`,
+    `Creditor-exposed net worth of ${fmt$(ins.exposedNetWorth)} (total net worth ${fmt$(ins.netWorth)} less retirement accounts and 529 plans, which are generally protected) vs. ${fmt$(d.umbrella)} umbrella coverage. Judgment creditors can reach non-exempt assets and future wages. Increase to ${fmt$(ins.umbrellaTarget)} (≈$200–400/yr per $1M) and confirm underlying auto/home liability meets the umbrella attachment point.`,
     `Coverage gap: ${fmt$(ins.umbrellaGap)}`,66);
   if(ins.ltcFlag1||ins.ltcFlag2) add('insurance','med','Long-term care exposure unaddressed',
     `Client age(s) ${d.c1_age}${d.c2_age?'/'+d.c2_age:''} with no LTC coverage. The underwriting sweet spot is 50–60; premiums and declinature risk rise steeply after. Evaluate: traditional LTCi, asset-based hybrid (life/LTC linked — return-of-premium optionality), or a designated self-funding bucket if investable assets exceed ~$2.5M. Median private-room SNF cost exceeds $110k/yr and compounds faster than CPI.`,'',56);
