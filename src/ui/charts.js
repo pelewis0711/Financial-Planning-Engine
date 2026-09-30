@@ -81,9 +81,12 @@ export function chDonut(elId,items){
 export function chBarH(elId,items){
   const el=document.getElementById(elId); if(!el)return;
   const W=640,H=Math.max(190,items.length*30+40),padL=150,padR=70;
-  const maxV=Math.max(...items.map(it=>Math.abs(it.value)),1);
-  const zero=padL+(W-padL-padR)*(Math.min(0,...items.map(it=>it.value))<0?.28:0);
-  const scale=(W-padL-padR-(zero-padL))/maxV;
+  // Share the plot width between negative and positive bars in proportion to
+  // their largest magnitudes, leaving room on each side for value labels.
+  const maxPos=Math.max(0,...items.map(it=>it.value)), maxNeg=Math.max(0,...items.map(it=>-it.value));
+  const labelRoom=maxNeg>0?52:0, plotL=padL+labelRoom, plotW=W-plotL-padR;
+  const scale=plotW/Math.max(maxPos+maxNeg,1);
+  const zero=plotL+maxNeg*scale;
   let g='',y=26;
   items.forEach((it,idx)=>{
     const w=Math.abs(it.value)*scale, x=it.value>=0?zero:zero-w;
@@ -103,7 +106,7 @@ export function chStack(elId,cfg){
   const W=640,H=280,padB=36,padT=16;
   const totals=cfg.cols.map(c=>c.parts.reduce((s,p)=>s+p.value,0));
   const maxV=Math.max(...totals,1)*1.08;
-  const bw=120,gap=150,x0=140;
+  const bw=110,gap=100,x0=110; // two columns end at x=430; legend starts at 470
   let g='';
   for(let k=0;k<=4;k++){const v=maxV*k/4,y=padT+(H-padT-padB)*(1-v/maxV);
     g+=`<line x1="70" y1="${y}" x2="${W-20}" y2="${y}" stroke="#e3e9f0"/><text x="64" y="${y+4}" text-anchor="end" font-size="10.5" fill="#7b8896">${fmtK(v)}</text>`;}
@@ -118,7 +121,7 @@ export function chStack(elId,cfg){
     g+=`<text x="${x+bw/2}" y="${H-2}" text-anchor="middle" font-size="10.5" fill="#7b8896">${fmt$(totals[ci])}</text>`;});
   let ly=30;
   const legend=[...new Map(cfg.cols.flatMap(c=>c.parts).map(p=>[p.label,p])).values()];
-  legend.forEach(p=>{g+=`<rect x="480" y="${ly-9}" width="11" height="11" rx="2" fill="${p.color}"/><text x="497" y="${ly}" font-size="11" fill="#3a4653">${p.label}</text>`;ly+=20;});
+  legend.forEach(p=>{g+=`<rect x="470" y="${ly-9}" width="11" height="11" rx="2" fill="${p.color}"/><text x="487" y="${ly}" font-size="11" fill="#3a4653">${p.label}</text>`;ly+=20;});
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
   el.querySelectorAll('.st').forEach(rc=>{
     rc.addEventListener('mousemove',ev=>{const p=cfg.cols[+rc.dataset.c].parts[+rc.dataset.p];showTip(`<b>${p.label}</b><br>${fmt$(p.value)}`,ev);});

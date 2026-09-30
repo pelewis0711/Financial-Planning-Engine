@@ -68,7 +68,7 @@ export function renderPlanHTML(M, { whatIf, baseline } = {}){
 
   const ladderHTML=ladder?`
     <h4>Roth Conversion Ladder — Retirement (${ret.retAge}) to RMD Onset (${ret.rmdAge1})</h4>
-    <p>Strategy: fill ordinary income to the top of the 24% bracket (${fmt$(ladder.top24)} TI) each pre-RMD year. Conversions are federally taxable but <b>exempt from Illinois income tax</b> under the retirement-income subtraction — a structural ${fmtPct(T26.il.rate)} discount for IL residents. IRMAA tier shown uses the conversion-year MAGI (2-year premium lookback applies).</p>
+    <p>Strategy: fill ordinary income to the top of the 24% bracket (${fmt$(ladder.top24)} of taxable income in 2026 dollars, indexed at ${fmtPct(a.infl)} inflation) each pre-RMD year. Conversions are federally taxable but <b>exempt from Illinois income tax</b> under the retirement-income subtraction — a structural ${fmtPct(T26.il.rate)} discount for IL residents. IRMAA tier shown uses the conversion-year MAGI (2-year premium lookback applies).</p>
     <table class="data"><tr><th style="text-align:left">Year</th><th>Age</th><th>Pre-Tax Balance</th><th>Conversion</th><th>Federal Tax</th><th>Eff. Rate</th><th>IRMAA Tier</th></tr>
     ${ladder.rows.map(rw=>`<tr><td>${rw.yr}</td><td>${rw.age}</td><td>${fmt$(rw.bal)}</td><td>${fmt$(rw.conv)}</td><td>${fmt$(rw.taxCost)}</td><td>${fmtPct(rw.effRate)}</td><td>${rw.irmTier===0?'—':rw.irmTier}</td></tr>`).join('')}
     </table>

@@ -106,3 +106,10 @@ const SNAPSHOT = {
   firstRMD: 493317,
   recommendations: 35,
 };
+
+test('compact currency formatting puts the sign before the dollar sign', async () => {
+  const { fmtK, fmt$ } = await import('../src/engine/format.js');
+  assert.equal(fmtK(-550000), '-$550k');
+  assert.equal(fmtK(1250000), '$1.3M');
+  assert.equal(fmt$(-1234.5), '-$1,235');
+});

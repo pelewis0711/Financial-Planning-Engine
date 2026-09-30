@@ -4,7 +4,10 @@ export const fmt$ = (n) => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLoca
 
 export const fmtPct = (n, digits = 1) => (n * 100).toFixed(digits) + '%';
 
-export const fmtK = (v) => Math.abs(v) >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M' : '$' + (v / 1e3).toFixed(0) + 'k';
+export const fmtK = (v) => {
+  const sign = v < 0 ? '-' : '', a = Math.abs(v);
+  return sign + (a >= 1e6 ? '$' + (a / 1e6).toFixed(1) + 'M' : '$' + (a / 1e3).toFixed(0) + 'k');
+};
 
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 

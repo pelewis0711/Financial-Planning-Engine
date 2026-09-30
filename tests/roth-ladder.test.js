@@ -62,13 +62,26 @@ test('Roth ladder: conversions shrink the first RMD and never raise the IRMAA ti
   assert.ok(ladder.irmSavings >= 0);
 });
 
-test('Roth ladder: conversion tax equals bracket arithmetic', () => {
+test('Roth ladder: conversion tax equals bracket arithmetic on inflation-indexed brackets', () => {
   const { ladder, tax } = buildModel(sample());
-  const br = T26.brackets[tax.fs];
   const first = ladder.rows[0];
-  // With no SS or pension in year one of retirement, base ordinary income is 0.
-  const expected = taxFromBrackets(first.conv, br);
-  assert.ok(Math.abs(first.taxCost - expected) < 0.01);
+  const indexed = T26.brackets[tax.fs].map(([lo, rate]) => [lo * first.bracketIndex, rate]);
+  // With no SS or pension in year one of retirement, base ordinary income is 0,
+  // so the conversion exactly fills the indexed top of the 24% bracket.
+  assert.ok(Math.abs(first.conv - 403550 * first.bracketIndex) < 0.01);
+  assert.ok(Math.abs(first.taxCost - taxFromBrackets(first.conv, indexed)) < 0.01);
+});
+
+test('Roth ladder: brackets are indexed at the inflation assumption', () => {
+  const { ladder, a } = buildModel(sample());
+  const [r0, r1] = ladder.rows;
+  assert.ok(Math.abs(r1.bracketIndex / r0.bracketIndex - (1 + a.infl)) < 1e-12);
+  assert.ok(r0.bracketIndex > 1, 'future years use larger nominal brackets');
+});
+
+test('IRMAA: an inflation index scales the thresholds', () => {
+  assert.equal(irmaaTier(220000, 'Married Filing Jointly', 1).tier, 1);
+  assert.equal(irmaaTier(220000, 'Married Filing Jointly', 1.1).tier, 0);
 });
 
 test('Roth ladder: skipped when there is no pre-tax money', () => {
