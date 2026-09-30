@@ -79,17 +79,20 @@ export const T26 = {
     simple: 17000, sep_pct: .25, sep_max: 72000,
     // SECURE 2.0 §107: born 1951–1959 → 73; born 1960+ → 75.
     rmdAge: (birthYear) => birthYear >= 1960 ? 75 : 73,
-    qcdAge: 70.5, qcdMax: 115000, r529ToRoth: 35000,
+    qcdAge: 70.5, qcdMax: 111000, r529ToRoth: 35000,
   },
   estate: { fedExemption: 15000000, annualGift: 19000, ilExemption: 4000000, ilPortability: false, superfund529: 95000 },
   il: { rate: .0495, retirementExempt: true },
-  // Medicare Part B IRMAA. Monthly premium per person; cliff thresholds on MAGI
-  // from two years prior. [threshold, premium]: MAGI above threshold → premium.
+  // Medicare Part B IRMAA (CMS 2026 fact sheet). Monthly premium per person,
+  // determined by MAGI from two years prior. Each [threshold, premium] pair
+  // means MAGI above threshold pays premium — except the top tier, which
+  // applies at MAGI greater than OR EQUAL to its threshold.
   irmaa: {
     stdB: 202.90,
     tiers: {
-      'Single':                 [[109000, 284.10], [137000, 405.80], [171000, 527.50], [205000, 649.30], [500000, 689.90]],
-      'Married Filing Jointly': [[218000, 284.10], [274000, 405.80], [342000, 527.50], [410000, 649.30], [750000, 689.90]],
+      'Single':                    [[109000, 284.10], [137000, 405.80], [171000, 527.50], [205000, 649.20], [500000, 689.90]],
+      'Married Filing Jointly':    [[218000, 284.10], [274000, 405.80], [342000, 527.50], [410000, 649.20], [750000, 689.90]],
+      'Married Filing Separately': [[109000, 649.20], [391000, 689.90]],
     },
   },
   educ: { aotc: 2500, aotcPhase: { 'Single': [80000, 90000], 'Married Filing Jointly': [160000, 180000] } },

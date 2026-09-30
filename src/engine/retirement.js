@@ -5,17 +5,22 @@
 import { T26, TAX_YEAR } from './params/ty2026.js';
 import { blendedReturn } from './assumptions.js';
 import { gaussian } from './random.js';
+import { firstRmdDivisor } from './roth-ladder.js';
 
 /**
  * Social Security benefit at claiming age, relative to the full-retirement-age
- * (67) benefit. Delayed credits: +8%/yr to 70.
+ * (FRA = 67) benefit.
+ *   Early: −5/9 of 1% per month for the first 36 months (6⅔%/yr),
+ *          −5/12 of 1% per month beyond that (5%/yr) → 70% of PIA at 62.
+ *   Late:  +8%/yr delayed retirement credits, capped at age 70.
  */
 export function ssAdjust(fraBenefit, claimAge) {
   if (!fraBenefit) return 0;
   const c = claimAge || 67;
   if (c >= 67) return fraBenefit * (1 + .08 * Math.min(3, c - 67));
-  const early = 67 - c;
-  return fraBenefit * (1 - early * (early <= 3 ? .0667 : .05));
+  const monthsEarly = Math.round((67 - c) * 12);
+  const reduction = Math.min(monthsEarly, 36) * (5 / 9 / 100) + Math.max(0, monthsEarly - 36) * (5 / 12 / 100);
+  return fraBenefit * (1 - reduction);
 }
 
 /**
@@ -122,7 +127,7 @@ export function computeRetirement(d, tax, a, cf, rng) {
   const yrsToRMD = Math.max(0, rmdAge1 - d.c1_age);
   const pretaxAtRMD = pretaxBal * Math.pow(1 + mu, yrsToRMD)
     + (tax.pretaxDeferrals + employer) * ((Math.pow(1 + mu, Math.min(yrsToRMD, yrsToRet)) - 1) / mu);
-  const firstRMD = pretaxAtRMD / 26.5; // Uniform Lifetime Table divisor at 73
+  const firstRMD = pretaxAtRMD / firstRmdDivisor(rmdAge1);
 
   // Contribution capacity
   const r = T26.retirement;

@@ -11,6 +11,6 @@ export function computeDebt(d, tax, a) {
   ].filter((x) => x.bal > 0).sort((x, y) => y.rate - x.rate);
   const total = items.reduce((s, x) => s + x.bal, 0);
   // After-tax equity return: the hurdle a debt rate must beat to be paid down first.
-  const hurdle = (1 - tax.marginalFed - tax.stateIncTaxRate) * 8.5;
+  const hurdle = (1 - tax.marginalFed - tax.stateIncTaxRate) * a.as_equity_ret;
   return { items, total, hurdle };
 }

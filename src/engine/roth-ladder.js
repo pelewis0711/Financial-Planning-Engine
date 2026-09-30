@@ -7,15 +7,17 @@ import { blendedReturn } from './assumptions.js';
 
 /**
  * IRMAA tier for a given MAGI. Tier 0 is the standard premium. Thresholds are
- * cliffs: MAGI $1 above a threshold pays the full higher premium.
- * MFS and HoH filers use the single schedule here (MFS actually has its own,
- * harsher schedule — noted in the methodology doc).
+ * cliffs: $1 of MAGI over a threshold pays the full higher premium.
+ * Head of household and qualifying surviving spouses use the single schedule;
+ * married filing separately has its own, much steeper schedule.
  */
 export function irmaaTier(magi, fs) {
-  const tiers = T26.irmaa.tiers[fs === 'Married Filing Jointly' ? 'Married Filing Jointly' : 'Single'];
+  const schedule = fs === 'Married Filing Jointly' || fs === 'Married Filing Separately' ? fs : 'Single';
+  const tiers = T26.irmaa.tiers[schedule];
   let tier = 0, prem = T26.irmaa.stdB;
   tiers.forEach(([threshold, premium], i) => {
-    if (magi > threshold) { tier = i + 1; prem = premium; }
+    const isTop = i === tiers.length - 1;
+    if (isTop ? magi >= threshold : magi > threshold) { tier = i + 1; prem = premium; }
   });
   return { tier, prem, surchargeAnnual: (prem - T26.irmaa.stdB) * 12 };
 }
